@@ -1,6 +1,6 @@
 #!/usr/bin/env python  
 import rospy
-
+#import evince  trying to read the graph!
 # Because of transformations
 import tf_conversions
 
@@ -31,7 +31,7 @@ def handle_turtle_pose(msg, turtlename):
     t.transform.rotation.z = q[2]
     t.transform.rotation.w = q[3]
 
-# Publish the trandsform.
+# Publish the transform.
     br.sendTransform(t)
 
 if __name__ == '__main__':

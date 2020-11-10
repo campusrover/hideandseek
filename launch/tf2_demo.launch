@@ -9,9 +9,18 @@
     <node name="turtle2_tf2_broadcaster" pkg="prrexamples" type="turtle_tf2_broadcaster.py" respawn="false" output="screen" >
       <param name="turtle" type="string" value="turtle2" /> 
     </node>
-<!-- 
+    <node name="turtle3_tf2_broadcaster" pkg="prrexamples" type="turtle_tf2_broadcaster.py" respawn="false" output="screen" >
+      <param name="turtle" type="string" value="turtle3" /> 
+    </node>
+    <node name="turtle4_tf2_broadcaster" pkg="prrexamples" type="turtle_tf2_broadcaster.py" respawn="false" output="screen" >
+      <param name="turtle" type="string" value="turtle4" /> 
+    </node>
+    <node name="turtle5_tf2_broadcaster" pkg="prrexamples" type="turtle_tf2_broadcaster.py" respawn="false" output="screen" >
+      <param name="turtle" type="string" value="turtle5" /> 
+    </node>
+
     <node pkg="prrexamples" type="turtle_tf2_listener.py" 
           name="listener" output="screen"/>
 
- -->
+
   </launch>
