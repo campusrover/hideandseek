@@ -1,13 +1,11 @@
 <launch>
-    <include file="/my_ros_data/catkin_ws/src/prrexamples/hideandseek/hideandseek/launch/robots.launch"/>
-
-    <node name="seeker" pkg="prrexamples" type="seeker.py" output="log"/>
-    <node name="hider" pkg="prrexamples" type="hider.py" output="log"/>
-    <node name="key_publisher" pkg="prrexamples" type="key_publisher.py" output="log"/>
-    <include file="$(find gazebo_ros)/launch/empty_world.launch">
-      <arg name="world_name" value="$(find prrexamples)/hideandseek/world/hideandseek.world"/>
-      <arg name="use_sim_time" value="true"/>
-      <arg name="debug" value="false"/>
-    </include>
-
+    <include file="/my_ros_data/catkin_ws/src/prrexamples/hideandseek/hideandseek/launch/robots.launch"/>
+    <node name="seeker" pkg="prrexamples" type="seeker.py" output="log"/>
+    <node name="hider" pkg="prrexamples" type="hider.py" output="log"/>
+    <node name="key_publisher" pkg="prrexamples" type="key_publisher.py" output="log"/>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="world_name" value="$(find prrexamples)/hideandseek/hideandseek/world/hideandseek.world"/>
+      <arg name="use_sim_time" value="true"/>
+      <arg name="debug" value="false"/>
+    </include>
 </launch>
