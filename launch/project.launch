@@ -9,7 +9,7 @@
     <arg name="hider_pos_z" default=" 0.0"/>
     <arg name="hider_yaw" default="0.0" />
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="world_name" value="$(find prrexamples)/worlds/maze.world"/>
+        <arg name="world_name" value="$(find prrexamples)/hideandseek/world/maze.world"/>
         <arg name="paused" value="false"/>
         <arg name="use_sim_time" value="true"/>
         <arg name="gui" value="true"/>
