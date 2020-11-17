@@ -1,0 +1,49 @@
+<launch>
+    <arg name="model" default="burger" doc="model type [burger, waffle, waffle_pi]"/>
+    <arg name="seeker_pos_x" default=" 5"/>
+    <arg name="seeker_pos_y" default=" 0.0"/>
+    <arg name="seeker_pos_z" default=" 0.0"/>
+    <arg name="seeker_yaw" default=" 3.14"/>
+    <arg name="hider_pos_x" default=" -0.25"/>
+    <arg name="hider_pos_y" default=" -0.25"/>
+    <arg name="hider_pos_z" default=" 0.0"/>
+    <arg name="hider_yaw" default="0.0" />
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find prrexamples)/worlds/maze.world"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>
+    <group ns="seeker">
+        <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+            <param name="publish_frequency" type="double" value="50.0" />
+            <param name="tf_prefix" value="seeker" />
+        </node>
+        <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model seeker -x $(arg seeker_pos_x) -y $(arg seeker_pos_y) -z $(arg seeker_pos_z) -Y $(arg seeker_yaw) -param robot_description" />
+    </group>
+    <group ns="hider">
+        <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+            <param name="publish_frequency" type="double" value="50.0" />
+            <param name="tf_prefix" value="hider" />
+        </node>
+        <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model hider -x $(arg hider_pos_x) -y $(arg hider_pos_y) -z $(arg hider_pos_z) -Y $(arg hider_yaw) -param robot_description" />
+    </group>
+    
+</launch>
+
+
+<!-- <launch>
+    <include file="/my_ros_data/catkin_ws/src/prrexamples/hideandseek/hideandseek/launch/robots.launch"/>
+    <node name="seeker" pkg="prrexamples" type="seeker.py" output="log"/>
+    <node name="hider" pkg="prrexamples" type="hider.py" output="log"/>
+    <node name="key_publisher" pkg="prrexamples" type="key_publisher.py" output="log"/>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="world_name" value="$(find prrexamples)/hideandseek/hideandseek/world/hideandseek.world"/>
+      <arg name="use_sim_time" value="true"/>
+      <arg name="debug" value="false"/>
+    </include>
+</launch> -->
