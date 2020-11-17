@@ -1,0 +1,20 @@
+<launch>
+  <arg name="model_1" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="x_pos_1" default="0.0"/>
+  <arg name="y_pos_1" default="0.0"/>
+  <arg name="z_pos_1" default="0.0"/>
+
+  <param name="seeker" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_$(arg model_1).urdf.xacro" />
+
+  <node name="spawn_urdf_1" pkg="gazebo_ros" type="spawn_model" args="-urdf -model turtlebot3_burger_1 -x $(arg x_pos_1) -y $(arg y_pos_1) -z $(arg z_pos_1) -param seeker" />
+
+  <arg name="model_2" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="x_pos_2" default="0.0"/>
+  <arg name="y_pos_2" default="0.0"/>
+  <arg name="z_pos_2" default="0.0"/>
+
+  <param name="hider" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_$(arg model_2).urdf.xacro" />
+
+  <node name="spawn_urdf_2" pkg="gazebo_ros" type="spawn_model" args="-urdf -model turtlebot3_burger_2 -x $(arg x_pos_2) -y $(arg y_pos_2) -z $(arg z_pos_2) -param hider" />
+
+</launch>
