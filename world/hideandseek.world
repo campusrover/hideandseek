@@ -19,7 +19,7 @@
         <collision name='collision'>
           <geometry>
             <plane>
-              <normal>0.4 0 1</normal>
+              <normal>0 0 1</normal>
               <size>30 30</size>
             </plane>
           </geometry>
