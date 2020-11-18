@@ -23,7 +23,7 @@ velocity_vector = [0, 0]
 PI = math.pi
 LINEAR_SPEED = 0.2
 ANGULAR_SPEED = PI/4
-cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+cmd_vel_pub = rospy.Publisher('/seeker/cmd_vel', Twist, queue_size=10)
 while not rospy.is_shutdown():
     # print out the current state and time since last key press
     t = Twist()
