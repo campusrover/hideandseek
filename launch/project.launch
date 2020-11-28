@@ -1,13 +1,13 @@
 <launch>
     <arg name="model" default="burger" doc="model type [burger, waffle, waffle_pi]"/>
-    <arg name="seeker_pos_x" default=" 5"/>
-    <arg name="seeker_pos_y" default=" 0.0"/>
+    <arg name="seeker_pos_x" default="7"/>
+    <arg name="seeker_pos_y" default=" 0.5"/>
     <arg name="seeker_pos_z" default=" 0.0"/>
     <arg name="seeker_yaw" default=" 3.14"/>
-    <arg name="hider_pos_x" default=" -0.25"/>
-    <arg name="hider_pos_y" default=" -0.25"/>
+    <arg name="hider_pos_x" default="7"/>
+    <arg name="hider_pos_y" default="1.5"/>
     <arg name="hider_pos_z" default=" 0.0"/>
-    <arg name="hider_yaw" default="0.0" />
+    <arg name="hider_yaw" default="3.14" />
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(find prrexamples)/hideandseek/world/hideandseek.world"/>
         <arg name="paused" value="false"/>
