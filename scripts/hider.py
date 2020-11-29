@@ -36,7 +36,6 @@ def scan_callback(msg):
         'fleft':  min(min(msg.ranges[280:339]), 10),
         'left':   min(min(msg.ranges[240:279]), 10),
     }
-    print(regions_)
 
     decider()
 
@@ -59,10 +58,6 @@ def key_cb(msg):
    state = msg.data
    last_key_press_time = rospy.Time.now()
 
-# odom is also not necessary but very useful
-def odom_cb(msg):
-   return
-
 # pub/subs
 scan_sub = rospy.Subscriber('/hider/scan', LaserScan, scan_callback)
 img_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, img_callback)
@@ -78,21 +73,21 @@ def decider():
     global regions_, hide
     regions = regions_
     d = 0.6
+    h = 0.1
     d2 = 1.5
-    if regions['front'] < d and regions['right'] < d and regions['fright'] < d and distanceX > 4 and distanceY > 4:
-        change_state(4)
-        hide = True
-        rospy.loginfo(regions)
-    elif regions['front'] < d and hide == False :  
+    if regions['front'] < d:  
         change_state(1)  # turn right
-    elif regions['fleft'] < d2 or regions['fleft'] == d2 or regions['left'] < d2 and hide == False:
+    elif regions['fleft'] < d2 or regions['fleft'] == d2 or regions['left'] < d2 and regions['front'] > h and regions['right'] > h and regions['fright'] > h :
         change_state(2)  # follow the wall
-    elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d and hide == False:
+    elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d:
         change_state(0)  # find wall
-    elif regions['front'] < d and regions['fleft'] < d and regions['fright'] < d and hide == False:
+    elif regions['front'] < d and regions['fleft'] < d and regions['fright'] < d:
         change_state(3)  # backup
-    elif regions['front'] > d and regions['fleft'] < d and regions['fright'] < d and hide == False:
+    elif regions['front'] > d and regions['fleft'] < d and regions['fright'] < d :
         change_state(2)
+        rospy.loginfo(regions)
+    elif regions['fleft'] < d2 or regions['fleft'] == d2 or regions['left'] < d2 and regions['front'] < h and regions['right'] < h and regions['fright'] < h and distanceX > 4 and distanceY > 4:
+        change_state(4)
         rospy.loginfo(regions)
 
 def change_state(state):
