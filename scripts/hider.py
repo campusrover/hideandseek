@@ -34,7 +34,7 @@ def scan_callback(msg):
         'fright': min(min(msg.ranges[10:59]), 10),
         'front':  min(min(msg.ranges[0:10]), 10),
         'fleft':  min(min(msg.ranges[280:339]), 10),
-        'left':   min(min(msg.ranges[240:279]), 10),
+        'left':   min(min(msg.ranges[270:300]), 10),
     }
 
     decider()
@@ -72,16 +72,18 @@ ranges = None; img = None
 def decider():
     global regions_, hide
     regions = regions_
-    d = 0.4
+    d = 0.5
     d2 = 1.5
-    if regions['front'] < d and regions['fright'] < d2 and distanceX > 3 and distanceY > 4:
+    print 'DistanceX: [%s]' % (distanceX)  
+    print 'Distancey: [%s]' % (distanceY) 
+    if regions['front'] < 0.2 and regions['left'] < 0.2 and distanceX < 0:
         change_state(4)
         hide = True
         rospy.loginfo(regions)
-    elif regions['front'] < d or regions['fright'] < d2:  
+    elif regions['front'] < d:  
         change_state(1)  # turn right
-    elif regions['fright'] < d2 or regions['fright'] == d2 or regions['right'] < d2:
-       change_state(2)  # Follow wall
+    elif regions['fleft'] < d or regions['fleft'] == d or regions['left'] < d:
+       change_state(2)  # follow wall
     elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d:
         change_state(0)  # find wall
     elif regions['front'] < d and regions['fleft'] < d and regions['fright'] < d:
@@ -98,21 +100,13 @@ def change_state(state):
 def follow_the_wall():
    global regions_
    msg = Twist()
-   msg.linear.x = 0.2
+   msg.linear.x = 0.4
    return msg
 
-def follow_the_wall():
-   global regions_
-   msg = Twist()
-   msg.linear.x = 0.2
-   return msg
- 
- 
 def find_wall():
    msg = Twist()
-   msg.linear.x = 0.3
+   msg.linear.x = 0.4
    return msg
- 
  
 def turnright():
    global direction
@@ -121,19 +115,11 @@ def turnright():
    msg.angular.z = PI/6
    return msg
  
- 
 def backup():
    global direction
    msg = Twist()
    msg.linear.x = -0.1
    msg.angular.z = PI/6
-   return msg
-
-def hide():
-   global direction
-   msg = Twist()
-   msg.linear.x = 0
-   msg.angular.z = 0
    return msg
 
 # control loop
@@ -152,7 +138,8 @@ while not rospy.is_shutdown():
         msg = backup()
         pass
     elif state1 == 4:
-        msg = hide()
+        msg.linear.x = 0
+        msg.angular.z = 0
 
     cmd_vel_pub.publish(msg)
 
