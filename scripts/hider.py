@@ -72,13 +72,16 @@ ranges = None; img = None
 def decider():
     global regions_, hide
     regions = regions_
-    d = 0.6
-    h = 0.1
+    d = 0.4
     d2 = 1.5
-    if regions['front'] < d:  
+    if regions['front'] < d and regions['fright'] < d2 and distanceX > 3 and distanceY > 4:
+        change_state(4)
+        hide = True
+        rospy.loginfo(regions)
+    elif regions['front'] < d or regions['fright'] < d2:  
         change_state(1)  # turn right
-    elif regions['fleft'] < d2 or regions['fleft'] == d2 or regions['left'] < d2 and regions['front'] > h and regions['right'] > h and regions['fright'] > h :
-        change_state(2)  # follow the wall
+    elif regions['fright'] < d2 or regions['fright'] == d2 or regions['right'] < d2:
+       change_state(2)  # Follow wall
     elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d:
         change_state(0)  # find wall
     elif regions['front'] < d and regions['fleft'] < d and regions['fright'] < d:
@@ -86,10 +89,6 @@ def decider():
     elif regions['front'] > d and regions['fleft'] < d and regions['fright'] < d :
         change_state(2)
         rospy.loginfo(regions)
-    elif regions['fleft'] < d2 or regions['fleft'] == d2 or regions['left'] < d2 and regions['front'] < h and regions['right'] < h and regions['fright'] < h and distanceX > 4 and distanceY > 4:
-        change_state(4)
-        rospy.loginfo(regions)
-
 def change_state(state):
    global state1
    if state is not state1:
