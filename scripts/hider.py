@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #autonomous bot
 
-import rospy, cv2, cv_bridge, numpy, math
+import rospy, cv2, cv_bridge, numpy, math, random
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan, Image
 from nav_msgs.msg import Odometry
@@ -68,15 +68,16 @@ odom_sub = rospy.Subscriber('/hider/odom', Odometry, odom_callback)
 rospy.init_node('hider')
 rate = rospy.Rate(10)
 ranges = None; img = None
+turned = False
 
 def decider():
     global regions_, hide
     regions = regions_
     d = 0.5
     d2 = 1.5
-    print 'DistanceX: [%s]' % (distanceX)  
-    print 'Distancey: [%s]' % (distanceY) 
-    if regions['front'] < 0.2 and regions['left'] < 0.3 and distanceX < 0:
+    # print 'DistanceX: [%s]' % (distanceX)  
+    # print 'Distancey: [%s]' % (distanceY) 
+    if regions['front'] < 0.2 and regions['left'] < 0.3 and distanceX > 3 and distanceY > 3:
         change_state(4)
         hide = True
         rospy.loginfo(regions)
@@ -115,18 +116,37 @@ def turnright():
    msg.angular.z = PI/6
    return msg
  
-def backup():
-   global direction
-   msg = Twist()
-   msg.linear.x = -0.1
-   msg.angular.z = PI/6
-   return msg
+def chooseDirection(direction):
+    global turned
+    print(direction)
+    turn = 0
+    if direction == 1:
+        turn = 0.7
+    elif direction == 2:
+        turn = 2.7
+    elif direction == 3:
+        turn = -0.785
+    elif direction == 4:
+        turn = -2.3
+    turned = True 
+    return turn
 
 # control loop
 while not rospy.is_shutdown():
-
     decider()
     msg = Twist()
+    if turned == False:
+        direction = random.randint(1,4)
+        turn = chooseDirection(1)
+        if turn > 0:
+            while yaw < turn:
+                print(yaw)
+                msg.angular.z = 0.3
+                cmd_vel_pub.publish(msg)            ## might not need second publisher
+        elif turn < 0:
+            while yaw > turn: 
+                msg.angular.z = -0.3
+                cmd_vel_pub.publish(msg) 
     if state1 == 0:
         msg = find_wall()
     elif state1 == 1:
