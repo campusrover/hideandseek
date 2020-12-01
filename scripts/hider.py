@@ -76,7 +76,7 @@ def decider():
     d2 = 1.5
     print 'DistanceX: [%s]' % (distanceX)  
     print 'Distancey: [%s]' % (distanceY) 
-    if regions['front'] < 0.2 and regions['left'] < 0.2 and distanceX < 0:
+    if regions['front'] < 0.2 and regions['left'] < 0.3 and distanceX < 0:
         change_state(4)
         hide = True
         rospy.loginfo(regions)
