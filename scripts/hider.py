@@ -23,6 +23,7 @@ distanceX = 0.0
 distanceY = 0.0
 roll = pitch = yaw = 0
 hide = False
+turned = False
 
 
 # scan callback
@@ -71,19 +72,20 @@ ranges = None; img = None
 turned = False
 
 def decider():
-    global regions_, hide
+    global regions_, hide, turned
     regions = regions_
-    d = 0.5
+    d = 0.6
     d2 = 1.5
-    # print 'DistanceX: [%s]' % (distanceX)  
-    # print 'Distancey: [%s]' % (distanceY) 
-    if regions['front'] < 0.2 and regions['left'] < 0.3 and distanceX > 3 and distanceY > 3:
+    if regions['front'] < 0.2 and regions['right'] < 0.2 or regions['left'] < 0.2 and abs(distanceX) > 3 and abs(distanceY) > 3 and turned == True:
         change_state(4)
         hide = True
         rospy.loginfo(regions)
-    elif regions['front'] < d:  
+    elif regions['front'] < d and regions['left'] < d:  
+        turned = True
         change_state(1)  # turn right
-    elif regions['fleft'] < d or regions['fleft'] == d or regions['left'] < d:
+    # elif regions['front'] < d and regions['right'] < d:  
+    #     change_state(5)  # turn left
+    elif regions['fleft'] < d or regions['fleft'] == d or regions['left'] < d or regions['fright'] < d or regions['fright'] == d or regions['right'] < d:
        change_state(2)  # follow wall
     elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d:
         change_state(0)  # find wall
@@ -93,9 +95,11 @@ def decider():
         change_state(2)
         rospy.loginfo(regions)
 def change_state(state):
-   global state1
+   global state1, distanceX, distanceY
    if state is not state1:
        print 'State: [%s]' % (state)  # prints state
+       print 'DistanceX: [%s]' % (distanceX)
+       print 'DistanceY: [%s]' % (distanceY)
        state1 = state  # changes state
 
 def follow_the_wall():
@@ -118,12 +122,11 @@ def turnright():
  
 def chooseDirection(direction):
     global turned
-    print(direction)
     turn = 0
     if direction == 1:
-        turn = 0.7
+        turn = 0.5
     elif direction == 2:
-        turn = 2.7
+        turn = 2.5
     elif direction == 3:
         turn = -0.785
     elif direction == 4:
@@ -137,10 +140,10 @@ while not rospy.is_shutdown():
     msg = Twist()
     if turned == False:
         direction = random.randint(1,4)
-        turn = chooseDirection(1)
+        print(direction)
+        turn = chooseDirection(2)
         if turn > 0:
             while yaw < turn:
-                print(yaw)
                 msg.angular.z = 0.3
                 cmd_vel_pub.publish(msg)            ## might not need second publisher
         elif turn < 0:
@@ -150,7 +153,7 @@ while not rospy.is_shutdown():
     if state1 == 0:
         msg = find_wall()
     elif state1 == 1:
-        msg = turnright()
+        msg = turnright()      #turns right
     elif state1 == 2:
         msg = follow_the_wall()
         pass
@@ -160,6 +163,7 @@ while not rospy.is_shutdown():
     elif state1 == 4:
         msg.linear.x = 0
         msg.angular.z = 0
+        break
 
     cmd_vel_pub.publish(msg)
 
