@@ -77,6 +77,10 @@
       <real_time_update_rate>1000</real_time_update_rate>
     </physics>
     <scene>
+    Ogre::MovableText* msg = new Ogre::MovableText("TXT_001", "this is the caption");
+msg->setTextAlignment(Ogre::MovableText::H_CENTER, Ogre::MovableText::V_ABOVE); // Center horizontally and display above the node
+/* msg->setAdditionalHeight( 2.0f ); //msg->setAdditionalHeight( ei.getRadius() ) // apparently not needed from 1.7*/
+mNode->attachObject(msg);
       <ambient>0.760784 0.662745 0.627451 1</ambient>
       <background>0. 0.2 0.4 1</background>
       <shadows>1</shadows>
