@@ -76,15 +76,14 @@ def decider():
     regions = regions_
     d = 0.6
     d2 = 1.5
-    if regions['front'] < 0.2 and regions['right'] < 0.2 or regions['left'] < 0.2 and abs(distanceX) > 3 and abs(distanceY) > 3 and turned == True:
+    if abs(distanceX) > 3 and abs(distanceY) > 3 and regions['front'] < 0.4 and regions['right'] < 0.8 and turned == True:  #or regions['left'] < 0.2 
         change_state(4)
         hide = True
         rospy.loginfo(regions)
-    elif regions['front'] < d and regions['left'] < d:  
-        turned = True
+    elif regions['front'] < 0.8 and regions['left'] < 0.8:  
         change_state(1)  # turn right
-    # elif regions['front'] < d and regions['right'] < d:  
-    #     change_state(5)  # turn left
+    elif regions['front'] < 0.7 and regions['right'] > d and regions['left'] > d:
+        change_state(1)     #wont run into wall
     elif regions['fleft'] < d or regions['fleft'] == d or regions['left'] < d or regions['fright'] < d or regions['fright'] == d or regions['right'] < d:
        change_state(2)  # follow wall
     elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d:
@@ -113,12 +112,11 @@ def find_wall():
    msg.linear.x = 0.4
    return msg
  
-def turnright():
-   global direction
-   msg = Twist()
-   msg.linear.x = 0.1
-   msg.angular.z = PI/6
-   return msg
+def turn():
+    msg = Twist()
+    msg.linear.x = 0.1
+    msg.angular.z = PI/6
+    return msg
  
 def chooseDirection(direction):
     global turned
@@ -136,12 +134,14 @@ def chooseDirection(direction):
 
 # control loop
 while not rospy.is_shutdown():
+    global regions_
     decider()
     msg = Twist()
+    print(turned)
     if turned == False:
         direction = random.randint(1,4)
         print(direction)
-        turn = chooseDirection(2)
+        turn = chooseDirection(direction)
         if turn > 0:
             while yaw < turn:
                 msg.angular.z = 0.3
@@ -153,7 +153,7 @@ while not rospy.is_shutdown():
     if state1 == 0:
         msg = find_wall()
     elif state1 == 1:
-        msg = turnright()      #turns right
+        msg = turn()      #turns right
     elif state1 == 2:
         msg = follow_the_wall()
         pass
@@ -163,6 +163,7 @@ while not rospy.is_shutdown():
     elif state1 == 4:
         msg.linear.x = 0
         msg.angular.z = 0
+        print(regions_)
         break
 
     cmd_vel_pub.publish(msg)
