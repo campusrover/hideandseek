@@ -74,15 +74,18 @@ turned = False
 def decider():
     global regions_, hide, turned
     regions = regions_
-    d = 0.6
+    d = 0.8
     d2 = 1.5
-    if abs(distanceX) > 3 and abs(distanceY) > 3 and regions['front'] < 0.4 and regions['right'] < 0.8 and turned == True:  #or regions['left'] < 0.2 
+    print(regions_)
+    if abs(distanceX) > 3 and abs(distanceY) > 3 and regions['front'] < 0.4 and regions['right'] < 0.4 or regions['left'] < 0.4 and turned == True:  #or regions['left'] < 0.2 
         change_state(4)
         hide = True
         rospy.loginfo(regions)
-    elif regions['front'] < 0.8 and regions['left'] < 0.8:  
+    elif regions['front'] < d and regions['left'] < d:  
+        print("here1")
         change_state(1)  # turn right
-    elif regions['front'] < 0.7 and regions['right'] > d and regions['left'] > d:
+    elif regions['front'] < d and regions['right'] > 0.4 and regions['left'] > 0.4:
+        print("here")
         change_state(1)     #wont run into wall
     elif regions['fleft'] < d or regions['fleft'] == d or regions['left'] < d or regions['fright'] < d or regions['fright'] == d or regions['right'] < d:
        change_state(2)  # follow wall
@@ -112,7 +115,7 @@ def find_wall():
    msg.linear.x = 0.4
    return msg
  
-def turn():
+def turnright():
     msg = Twist()
     msg.linear.x = 0.1
     msg.angular.z = PI/6
@@ -137,11 +140,10 @@ while not rospy.is_shutdown():
     global regions_
     decider()
     msg = Twist()
-    print(turned)
     if turned == False:
         direction = random.randint(1,4)
         print(direction)
-        turn = chooseDirection(direction)
+        turn = chooseDirection(2)
         if turn > 0:
             while yaw < turn:
                 msg.angular.z = 0.3
@@ -153,7 +155,7 @@ while not rospy.is_shutdown():
     if state1 == 0:
         msg = find_wall()
     elif state1 == 1:
-        msg = turn()      #turns right
+        msg = turnright()      #turns right
     elif state1 == 2:
         msg = follow_the_wall()
         pass
