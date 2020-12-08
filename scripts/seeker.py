@@ -67,31 +67,35 @@ class Seeker:
     
     def decider(seeker):
         regions = seeker.regions_
-        d = 0.5
+        d = 1.0
         d2 = 1.5
-        if seeker.count%6 == 0 and regions['front'] > d and regions['fleft'] > d and regions['fright'] > d:
+        if seeker.count%10 == 0 and regions['front'] > d and regions['fleft'] > d and regions['fright'] > d:
             print("turning in place")
             turn = 2.5
             while (seeker.yaw < turn):
                 print(seeker.yaw)
                 seeker.twist.linear.x = 0.0
-                seeker.twist.angular.z = 0.5
+                seeker.twist.angular.z = 0.7
+                seeker.pub.publish(seeker.twist)
+            while (seeker.yaw < 0):
+                seeker.twist.linear.x = 0.0
+                seeker.twist.angular.z = 0.7
                 seeker.pub.publish(seeker.twist)
         elif regions['front'] < d and regions['right'] < d: # turn right
             print("turning right")
             seeker.twist.linear.x = 0.1
-            seeker.twist.angular.z = seeker.PI/6 
-        elif regions['front'] < d and regions['left'] < d: # turn left
-            print("turning left")
+            seeker.twist.angular.z = seeker.PI/6    
+        elif regions['front'] < d and regions['right'] > d and regions['left'] > d:
+            print("wont run into wall")
             seeker.twist.linear.x = 0.1
-            seeker.twist.angular.z = -(seeker.PI/6)           
+            seeker.twist.angular.z = seeker.PI/6     
         elif regions['fleft'] < d or regions['fleft'] == d or regions['left'] < d or regions['fright'] < d or regions['fright'] == d or regions['fright'] < d: # follow wall
             print("following the wall")
-            seeker.twist.linear.x = 0.4
+            seeker.twist.linear.x = 0.6
             seeker.twist.angular.z = 0.4
         elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d: # find wall
             print("find wall")
-            seeker.twist.linear.x = 0.4
+            seeker.twist.linear.x = 0.6
             seeker.twist.angular.z = 0.0
    
     # img callback
@@ -117,7 +121,7 @@ class Seeker:
             if seeker.turned == False:
                 direction = random.randint(1,4)
                 print(direction)
-                turn = seeker.chooseDirection(3)
+                turn = seeker.chooseDirection(direction)
                 if turn > 0:
                     while seeker.yaw < turn:
                         seeker.twist.angular.z = 0.3
