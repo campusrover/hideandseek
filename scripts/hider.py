@@ -24,7 +24,7 @@ distanceY = 0.0
 roll = pitch = yaw = 0
 hide = False
 turned = False
-
+turnedleft=False
 
 # scan callback
 def scan_callback(msg):
@@ -72,28 +72,33 @@ ranges = None; img = None
 turned = False
 
 def decider():
-    global regions_, hide, turned
+    global regions_, hide, turned, turnedleft
     regions = regions_
     d = 0.8
     d2 = 1.5
-    print(regions_)
-    if abs(distanceX) > 3 and abs(distanceY) > 3 and regions['front'] < 0.4 and regions['right'] < 0.4 or regions['left'] < 0.4 and turned == True:  #or regions['left'] < 0.2 
-        change_state(4)
-        hide = True
-        rospy.loginfo(regions)
+    # print(regions_)
+    # print 'DistanceX: [%s]' % (distanceX)
+    # print 'DistanceY: [%s]' % (distanceY)
+    if regions['front'] < 0.4 and regions['right'] < 0.3 or regions['left'] < 0.3 and turned == True:  #or regions['left'] < 0.2 
+        if abs(distanceX) > 3.5 and abs(distanceY) > 3.5:
+            change_state(4)
+            hide = True
+            rospy.loginfo(regions)
     elif regions['front'] < d and regions['left'] < d:  
         print("here1")
         change_state(1)  # turn right
-    elif regions['front'] < d and regions['right'] > 0.4 and regions['left'] > 0.4:
+    elif regions['front'] < d and regions['right'] < d:
+        turnedleft=True
         print("here")
-        change_state(1)     #wont run into wall
-    elif regions['fleft'] < d or regions['fleft'] == d or regions['left'] < d or regions['fright'] < d or regions['fright'] == d or regions['right'] < d:
+        change_state(5)     #wont run into wall
+    elif regions['fleft'] < d or regions['fleft'] == d or regions['left'] < d or regions['fright'] < d or regions['fright'] == d or regions['right'] < 0.6:
        change_state(2)  # follow wall
     elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d:
         change_state(0)  # find wall
-    elif regions['front'] < d and regions['fleft'] < d and regions['fright'] < d:
-        change_state(3)  # backup
-    elif regions['front'] > d and regions['fleft'] < d and regions['fright'] < d :
+    # elif regions['front'] < d and regions['fleft'] < d and regions['fright'] < d:
+    #     change_state(3)  # backup
+    elif regions['front'] > d and regions['fleft'] < d and regions['fright'] < d:
+        print("here2")
         change_state(2)
         rospy.loginfo(regions)
 def change_state(state):
@@ -120,6 +125,11 @@ def turnright():
     msg.linear.x = 0.1
     msg.angular.z = PI/6
     return msg
+def turnleft():
+    msg = Twist()
+    msg.linear.x = 0.1
+    msg.angular.z = -PI/6
+    return msg
  
 def chooseDirection(direction):
     global turned
@@ -143,7 +153,7 @@ while not rospy.is_shutdown():
     if turned == False:
         direction = random.randint(1,4)
         print(direction)
-        turn = chooseDirection(2)
+        turn = chooseDirection(1)
         if turn > 0:
             while yaw < turn:
                 msg.angular.z = 0.3
@@ -161,6 +171,9 @@ while not rospy.is_shutdown():
         pass
     elif state1 == 3:
         msg = backup()
+        pass
+    elif state1 == 5:
+        msg = turnleft()
         pass
     elif state1 == 4:
         msg.linear.x = 0
