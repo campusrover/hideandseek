@@ -84,7 +84,7 @@ def decider():
             change_state(4)
             hide = True
             rospy.loginfo(regions)
-    elif regions['front'] < d and regions['left'] < d:  
+    elif regions['front'] < 0.9 and regions['left'] < 0.9:  
         print("here1")
         change_state(1)  # turn right
     elif regions['front'] < d and regions['right'] < d:
