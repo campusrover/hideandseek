@@ -37,7 +37,7 @@ def scan_callback(msg):
         'left':   min(min(msg.ranges[270:300]), 10),
     }
 
-def odom_callback(msg):
+def odom_callback(msg):     #we use this for both yaw and distancex and distancey to find a hiding place
     global distanceX, distanceY
     global roll, pitch, yaw
     distanceX = msg.pose.pose.position.x
@@ -60,7 +60,7 @@ turned = False
 def decider():
     global regions_, hide, turned, direction
     regions = regions_
-    d = 0.8
+    d = 0.8     #constant distance for all conditions
     print(regions_)
     if regions['front'] < d and regions['right'] < 0.4 or regions['left'] < 0.4 and turned == True:  #conditions for corner detection
         if direction == 4:
