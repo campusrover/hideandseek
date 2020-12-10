@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+#autonomous seeker bot
+
 import rospy, sys, math, tf, random
 import cv2, cv_bridge, numpy
 from std_msgs.msg import String
@@ -19,7 +21,6 @@ class Seeker:
         seeker.yaw = seeker.roll = seeker.pitch = 0
         seeker.cv = cv_bridge.CvBridge()
         seeker.PI = 3.14
-        seeker.count = 0
         seeker.turned = False
         seeker.quadrant = 0
         seeker.start_seeking = False 
@@ -38,7 +39,7 @@ class Seeker:
         cv2.namedWindow("Image_Window", cv2.WINDOW_NORMAL)
         cv2.namedWindow("band", cv2.WINDOW_NORMAL)
 
-    # scan callback
+    # scan callback which finds the lidar readings for all sides of the robot. 
     def scan_callback(seeker, msg):
         ranges = msg.ranges
         seeker.regions_ = {
@@ -51,7 +52,8 @@ class Seeker:
             'bright': min(min(msg.ranges[93:173]), 10),
             'back':   min(min(msg.ranges[177:182]), 10),
             }
-        #print(seeker.regions_)
+        
+        # these if statements make sure that the seeker waits for 40 seconds so that the hider can hide. 
         if ((rospy.Time.now().to_sec() - seeker.starting_time) >= 40):
             seeker.start_seeking = True
         elif (seeker.start_seeking == False):
@@ -64,6 +66,18 @@ class Seeker:
         orientation_list = [orientation.x, orientation.y, orientation.z, orientation.w]
         (seeker.roll, seeker.pitch, seeker.yaw) = euler_from_quaternion(orientation_list)
 
+    # this method is used to "guess" which direction the hider walked towards to hider
+    def sense_hider(seeker):
+        if seeker.regions_['right'] < 10:
+            seeker.quadrant = 1
+        elif seeker.regions_['bright'] < 2:
+            seeker.quadrant = 2
+        elif seeker.regions_['fleft'] < 10:
+            seeker.quadrant = 3
+        elif seeker.regions_['back'] < 1:
+            seeker.quadrant = 4
+
+    # based on the guessed quadrant, a number for how much the robot should turn is sent
     def chooseDirection(seeker, direction):
         turn = 0
         if turn == 1:
@@ -76,38 +90,18 @@ class Seeker:
             turn = -2.3
         seeker.turned = True 
         return turn
-
-    def sense_hider(seeker):
-        if seeker.regions_['right'] < 10:
-            seeker.quadrant = 1
-        elif seeker.regions_['bright'] < 2:
-            seeker.quadrant = 2
-        elif seeker.regions_['fleft'] < 10:
-            seeker.quadrant = 3
-        elif seeker.regions_['back'] < 1:
-            seeker.quadrant = 4
     
+    # the brain of the seeker - decides the movement of the seeker based on the lidar regions (uses a wall following algorithm)
     def decider(seeker):
         regions = seeker.regions_
         d = 1.0
         d2 = 1.5
-        # if seeker.count%10 == 0 and regions['front'] > d and regions['fleft'] > d and regions['fright'] > d:
-        #     print("turning in place")
-        #     turn = 2.5
-        #     while (seeker.yaw < turn):
-        #         seeker.twist.linear.x = 0.0
-        #         seeker.twist.angular.z = 0.7
-        #         seeker.pub.publish(seeker.twist)
-        #     while (seeker.yaw < 0):
-        #         seeker.twist.linear.x = 0.0
-        #         seeker.twist.angular.z = 0.7
-        #         seeker.pub.publish(seeker.twist)
         if regions['front'] < d and regions['left'] < d: # turn right
             print("turning right")
             seeker.twist.linear.x = 0.1
             seeker.twist.angular.z = seeker.PI/6   
         elif regions['front'] < d and regions['right'] < d:
-            print("specialhere")
+            print("turn")
             seeker.twist.linear.x = 0.1
             seeker.twist.angular.z = -seeker.PI/6  
         elif regions['front'] < d and regions['right'] > d and regions['left'] > d:
@@ -125,17 +119,19 @@ class Seeker:
    
     # img callback
     def img_callback(seeker, msg):
-        if (seeker.start_seeking) and not seeker.found:
+        if (seeker.start_seeking) and not seeker.found: # only starts seeking after 40 seconds 
             print('seeking!')
             # get image from camera(from msg) and encode it to bgr8, then convert this image to hsv
             image = seeker.cv.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
+            # black color range since the hider is black and grey. 
             lower_black = numpy.array([0, 0, 0])
             upper_black = numpy.array([180, 255, 30])
             mask = cv2.inRange(hsv, lower_black, upper_black)
 
             moment = cv2.moments(mask)
+            # if the seeker sees black, it will say it has found the hider
             if moment['m00'] > 5:
                 seeker.found = True 
                 print('I FOUND YOU')
@@ -143,25 +139,22 @@ class Seeker:
                 seeker.twist.angular.z = 0.0
             else:
                 print('hider not found yet')
-                print(seeker.yaw)
                 if seeker.turned == False:
                     print(seeker.quadrant)
                     turn = seeker.chooseDirection(seeker.quadrant)
                     if turn > 0:
-                        print("turn > 0")
                         while seeker.yaw < turn:
                             seeker.twist.angular.z = 0.5
                             seeker.pub.publish(seeker.twist)
                     elif turn < 0:
-                        print("turn < 0")
                         while seeker.yaw > turn: 
                             seeker.twist.angular.z = -0.5  
                             seeker.pub.publish(seeker.twist)
                 seeker.decider()
-                seeker.count = seeker.count + 1
 
             seeker.pub.publish(seeker.twist)
 
+            # opens a camera window
             cv2.resizeWindow("Image_Window", 300, 300)
             cv2.resizeWindow("band", 300, 300)
             cv2.imshow("Image_Window", image)
