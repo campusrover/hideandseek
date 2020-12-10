@@ -1,1 +1,3 @@
-#info for seeker goes here 
+### The Seeker Algorithm
+
+The seeker algorithm begins with the seeker waiting for a set period of time till the hider is able to hide. Like in the real game of hide and seek, it’s eyes represented by the computer vision are closed however, just like we would sense which direction someone is walking to to hide with our ears, the seeker senses this with it’s lidar readings already running. After the set period of hiding time is over, it has a good guess of which direction the hider walked towards. With the wall following algorithm, it makes it’s way to that area and uses open cv and computer vision to find the robot. Since the hider is black, the seeker will know it has found the hider when it see’s a color in that range as shown in these camera windows 
