@@ -5,3 +5,7 @@
   * [Seeker](seeker.md)
   * [Launch File](launch.md)
   * [Custom World](world.md)
+* [Difficulties and Obstacles Overcome](obstacles.md)
+  * [Bugs](bugs.md)
+  * [Reflection](reflection.md)
+  
