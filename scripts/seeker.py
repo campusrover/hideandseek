@@ -1,49 +1,167 @@
 #!/usr/bin/env python
-#teleop bot
-import rospy
-import sys
-import math
-import tf
-from std_msgs.msg import String
-from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Twist
-from sensor_msgs.msg import LaserScan
-from tf.transformations import euler_from_quaternion
-def key_cb(msg):
-   global state; global last_key_press_time
-   state = msg.data
-   last_key_press_time = rospy.Time.now()
-rospy.init_node('seeker')
-key_sub = rospy.Subscriber('keys', String, key_cb)
-state = "H"
-last_key_press_time = rospy.Time.now()
-# set rate
-rate = rospy.Rate(1)
-velocity_vector = [0, 0]
-PI = math.pi
-LINEAR_SPEED = 0.2
-ANGULAR_SPEED = PI/4
-cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-while not rospy.is_shutdown():
-    # print out the current state and time since last key press
-    t = Twist()
-    current_time = rospy.Time.now()
-    lapse = current_time - last_key_press_time
-    # rotate left
-    if state == "l":
-        velocity_vector = [0, 1]
-    # rotate right
-    elif state == "r":
-        velocity_vector = [0, -1]
-    # move forward
-    elif state == "f":
-        velocity_vector = [1, 0]
-    # move backward
-    elif state == "b":
-        velocity_vector = [-1, 0]
+#autonomous seeker bot
 
-    t.linear.x = LINEAR_SPEED * velocity_vector[0]
-    t.angular.z = ANGULAR_SPEED * velocity_vector[1]
+import rospy, sys, math, tf, random
+import cv2, cv_bridge, numpy
+from std_msgs.msg import String
+from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Image, LaserScan
+from nav_msgs.msg import Odometry
+from tf.transformations import euler_from_quaternion
+import datetime
+
+class Seeker: 
+
+    def __init__(seeker):
+        seeker.img_sub = rospy.Subscriber('/seeker/camera/rgb/image_raw', Image, seeker.img_callback)
+        seeker.pub = rospy.Publisher('/seeker/cmd_vel', Twist, queue_size=1)
+        seeker.scan_sub = rospy.Subscriber('/seeker/scan', LaserScan, seeker.scan_callback)
+        seeker.odom_sub = rospy.Subscriber('/seeker/odom', Odometry, seeker.odom_callback)
+        seeker.twist = Twist()
+        seeker.yaw = seeker.roll = seeker.pitch = 0
+        seeker.cv = cv_bridge.CvBridge()
+        seeker.PI = 3.14
+        seeker.turned = False
+        seeker.quadrant = 0
+        seeker.start_seeking = False 
+        seeker.starting_time = rospy.Time.now().to_sec()
+        seeker.regions_ = {           
+            'right':0,
+            'left':0,
+            'fright':0,
+            'front':0,
+            'fleft':0,
+            'bleft':0,
+            'bright':0,
+            'back': 0
+            }
+        seeker.found = False
+        cv2.namedWindow("Image_Window", cv2.WINDOW_NORMAL)
+        cv2.namedWindow("band", cv2.WINDOW_NORMAL)
+
+    # scan callback which finds the lidar readings for all sides of the robot. 
+    def scan_callback(seeker, msg):
+        ranges = msg.ranges
+        seeker.regions_ = {
+            'right':  min(min(msg.ranges[60:92]), 10),
+            'fright': min(min(msg.ranges[10:59]), 10),
+            'front':  min(min(msg.ranges[0:1]), 10),
+            'fleft':  min(min(msg.ranges[280:342]), 10),
+            'left':   min(min(msg.ranges[260:300]), 10),
+            'bleft':  min(min(msg.ranges[190:255]), 10),
+            'bright': min(min(msg.ranges[93:173]), 10),
+            'back':   min(min(msg.ranges[177:182]), 10),
+            }
+        
+        # these if statements make sure that the seeker waits for 40 seconds so that the hider can hide. 
+        if ((rospy.Time.now().to_sec() - seeker.starting_time) >= 40):
+            seeker.start_seeking = True
+        elif (seeker.start_seeking == False):
+            print('waiting')
+            seeker.sense_hider()
+
+    # odom callback 
+    def odom_callback(seeker, msg):
+        orientation = msg.pose.pose.orientation
+        orientation_list = [orientation.x, orientation.y, orientation.z, orientation.w]
+        (seeker.roll, seeker.pitch, seeker.yaw) = euler_from_quaternion(orientation_list)
+
+    # this method is used to "guess" which direction the hider walked towards to hider
+    def sense_hider(seeker):
+        if seeker.regions_['right'] < 10:
+            seeker.quadrant = 1
+        elif seeker.regions_['bright'] < 2:
+            seeker.quadrant = 2
+        elif seeker.regions_['fleft'] < 10:
+            seeker.quadrant = 3
+        elif seeker.regions_['back'] < 1:
+            seeker.quadrant = 4
+
+    # based on the guessed quadrant, a number for how much the robot should turn is sent
+    def chooseDirection(seeker, direction):
+        turn = 0
+        if turn == 1:
+            turn = 0.5
+        elif direction == 2:
+            turn = 2
+        elif direction == 3:
+            turn = -0.95
+        elif direction == 4:
+            turn = -2.3
+        seeker.turned = True 
+        return turn
     
-    cmd_vel_pub.publish(t)
-    rate.sleep()
+    # the brain of the seeker - decides the movement of the seeker based on the lidar regions (uses a wall following algorithm)
+    def decider(seeker):
+        regions = seeker.regions_
+        d = 1.0
+        d2 = 1.5
+        if regions['front'] < d and regions['left'] < d: # turn right
+            print("turning right")
+            seeker.twist.linear.x = 0.1
+            seeker.twist.angular.z = seeker.PI/6   
+        elif regions['front'] < d and regions['right'] < d:
+            print("turn")
+            seeker.twist.linear.x = 0.1
+            seeker.twist.angular.z = -seeker.PI/6  
+        elif regions['front'] < d and regions['right'] > d and regions['left'] > d:
+            print("wont run into wall")
+            seeker.twist.linear.x = 0.1
+            seeker.twist.angular.z = seeker.PI/6     
+        elif regions['fleft'] < d or regions['fleft'] == d or regions['left'] < d or regions['fright'] < d or regions['fright'] == d or regions['fright'] < d: # follow wall
+            print("following the wall")
+            seeker.twist.linear.x = 0.4
+            seeker.twist.angular.z = 0
+        elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d: # find wall
+            print("find wall")
+            seeker.twist.linear.x = 0.4
+            seeker.twist.angular.z = 0.0
+   
+    # img callback
+    def img_callback(seeker, msg):
+        if (seeker.start_seeking) and not seeker.found: # only starts seeking after 40 seconds 
+            print('seeking!')
+            # get image from camera(from msg) and encode it to bgr8, then convert this image to hsv
+            image = seeker.cv.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+            # black color range since the hider is black and grey. 
+            lower_black = numpy.array([0, 0, 0])
+            upper_black = numpy.array([180, 255, 30])
+            mask = cv2.inRange(hsv, lower_black, upper_black)
+
+            moment = cv2.moments(mask)
+            # if the seeker sees black, it will say it has found the hider
+            if moment['m00'] > 5:
+                seeker.found = True 
+                print('I FOUND YOU')
+                seeker.twist.linear.x = 0.0
+                seeker.twist.angular.z = 0.0
+            else:
+                print('hider not found yet')
+                if seeker.turned == False:
+                    print(seeker.quadrant)
+                    turn = seeker.chooseDirection(seeker.quadrant)
+                    if turn > 0:
+                        while seeker.yaw < turn:
+                            seeker.twist.angular.z = 0.5
+                            seeker.pub.publish(seeker.twist)
+                    elif turn < 0:
+                        while seeker.yaw > turn: 
+                            seeker.twist.angular.z = -0.5  
+                            seeker.pub.publish(seeker.twist)
+                seeker.decider()
+
+            seeker.pub.publish(seeker.twist)
+
+            # opens a camera window
+            cv2.resizeWindow("Image_Window", 300, 300)
+            cv2.resizeWindow("band", 300, 300)
+            cv2.imshow("Image_Window", image)
+            cv2.imshow("band", mask)
+            cv2.waitKey(3)
+
+print('Time to seek!')
+rospy.init_node('seeker')
+seeker = Seeker()
+rospy.spin()
