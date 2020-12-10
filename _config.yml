@@ -1,1 +1,8 @@
+root: ./
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md
 theme: jekyll-theme-slate
+title: "Autonomous Hide and Seek"
+author: "Belle Scott and Mahima Devanahalli"
