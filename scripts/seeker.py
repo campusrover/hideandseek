@@ -52,7 +52,7 @@ class Seeker:
             'back':   min(min(msg.ranges[177:182]), 10),
             }
         #print(seeker.regions_)
-        if ((rospy.Time.now().to_sec() - seeker.starting_time) >= 20):
+        if ((rospy.Time.now().to_sec() - seeker.starting_time) >= 40):
             seeker.start_seeking = True
         elif (seeker.start_seeking == False):
             print('waiting')
@@ -69,9 +69,9 @@ class Seeker:
         if turn == 1:
             turn = 0.5
         elif direction == 2:
-            turn = 2.5
+            turn = 2
         elif direction == 3:
-            turn = -0.785
+            turn = -0.95
         elif direction == 4:
             turn = -2.3
         seeker.turned = True 
@@ -102,21 +102,25 @@ class Seeker:
         #         seeker.twist.linear.x = 0.0
         #         seeker.twist.angular.z = 0.7
         #         seeker.pub.publish(seeker.twist)
-        if regions['front'] < d and regions['right'] < d: # turn right
+        if regions['front'] < d and regions['left'] < d: # turn right
             print("turning right")
             seeker.twist.linear.x = 0.1
-            seeker.twist.angular.z = -seeker.PI/6    
+            seeker.twist.angular.z = seeker.PI/6   
+        elif regions['front'] < d and regions['right'] < d:
+            print("specialhere")
+            seeker.twist.linear.x = 0.1
+            seeker.twist.angular.z = -seeker.PI/6  
         elif regions['front'] < d and regions['right'] > d and regions['left'] > d:
             print("wont run into wall")
             seeker.twist.linear.x = 0.1
-            seeker.twist.angular.z = -seeker.PI/6     
+            seeker.twist.angular.z = seeker.PI/6     
         elif regions['fleft'] < d or regions['fleft'] == d or regions['left'] < d or regions['fright'] < d or regions['fright'] == d or regions['fright'] < d: # follow wall
             print("following the wall")
-            seeker.twist.linear.x = 0.6
-            seeker.twist.angular.z = 0.4
+            seeker.twist.linear.x = 0.4
+            seeker.twist.angular.z = 0
         elif regions['front'] > d and regions['fleft'] > d and regions['fright'] > d: # find wall
             print("find wall")
-            seeker.twist.linear.x = 0.6
+            seeker.twist.linear.x = 0.4
             seeker.twist.angular.z = 0.0
    
     # img callback
@@ -132,21 +136,24 @@ class Seeker:
             mask = cv2.inRange(hsv, lower_black, upper_black)
 
             moment = cv2.moments(mask)
-            if moment['m00'] > 0:
+            if moment['m00'] > 5:
                 seeker.found = True 
                 print('I FOUND YOU')
                 seeker.twist.linear.x = 0.0
                 seeker.twist.angular.z = 0.0
             else:
                 print('hider not found yet')
+                print(seeker.yaw)
                 if seeker.turned == False:
                     print(seeker.quadrant)
                     turn = seeker.chooseDirection(seeker.quadrant)
                     if turn > 0:
+                        print("turn > 0")
                         while seeker.yaw < turn:
                             seeker.twist.angular.z = 0.5
                             seeker.pub.publish(seeker.twist)
                     elif turn < 0:
+                        print("turn < 0")
                         while seeker.yaw > turn: 
                             seeker.twist.angular.z = -0.5  
                             seeker.pub.publish(seeker.twist)
@@ -155,8 +162,8 @@ class Seeker:
 
             seeker.pub.publish(seeker.twist)
 
-            cv2.resizeWindow("Image_Window", 500, 500)
-            cv2.resizeWindow("band", 500, 500)
+            cv2.resizeWindow("Image_Window", 300, 300)
+            cv2.resizeWindow("band", 300, 300)
             cv2.imshow("Image_Window", image)
             cv2.imshow("band", mask)
             cv2.waitKey(3)
