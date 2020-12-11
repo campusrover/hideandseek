@@ -1,2 +1,2 @@
-# Autonomous Hide and Seek Introduction
+# Autonomous Hide and Seek
 
