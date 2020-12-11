@@ -1,3 +1,15 @@
+# Table of contents
+
+* [General Overview](overview.md)
+  * [Hider](hider.md)
+  * [Seeker](seeker.md)
+  * [Launch File](launch.md)
+  * [Custom World](world.md)
+* [Difficulties and Obstacles Overcome](obstacles.md)
+  * [Bugs](bugs.md)
+  * [Reflection](reflection.md)
+
+
 ## Obstacles, Pivots, and Achievments 
 
 Given that this project was completed in a little over a month by two students, we faced a lot of obstacles and overcome them with creativity and brainstorming together. Our initial goal was to have both robots be autonomous, but halfway through, we were not sure whether we would succeed in this goal, and rather control the seeker via teleop. Thankfully, we got some much needed motivation, and we ended up succeeding all our our ambitions. 
