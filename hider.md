@@ -17,7 +17,7 @@ Hider starts a meter away from seeker and begins it's quest to find a good hidin
                 cmd_vel_pub.publish(msg) 
 ```
 
-It spins until it reaches the designated yaw, then goes forward, now searching for a hiding place. The algorithm is now a wall following one, but there are a few more conditions for the hider. First, it uses LIDAR readings to measure proximity in five different regions. 
+It spins until it reaches the designated yaw, then goes forward, now searching for a hiding place. The algorithm is now a wall following one, but there are a few more conditions for the hider. One of the most advanced parts of hider is it's wall following algorithm, which can turn both right and left, and follow walls on both right and left sides, which was one of the most difficult and finicky parts of our project. In order to select a hiding palce, it first uses LIDAR readings to measure proximity in five different regions. 
 
 ``` xml
     regions_ = {                #scan regions
