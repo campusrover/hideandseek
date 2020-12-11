@@ -5,6 +5,6 @@ structure:
   summary: SUMMARY.md
 theme: jekyll-theme-slate
 title: "Autonomous Hide and Seek"
-baseurl: "/hideandseek1" # the subpath of your site, e.g. /blog
+baseurl: "/hideandseek" # the subpath of your site, e.g. /blog
 url: "https://hideandseek.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
 author: "Belle Scott and Mahima Devanahalli"
