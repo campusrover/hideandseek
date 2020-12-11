@@ -1,3 +1,15 @@
+# Table of contents
+
+* [General Overview](overview.md)
+  * [Hider](hider.md)
+  * [Seeker](seeker.md)
+  * [Launch File](launch.md)
+  * [Custom World](world.md)
+* [Difficulties and Obstacles Overcome](obstacles.md)
+  * [Bugs](bugs.md)
+  * [Reflection](reflection.md)
+
+
 ## The Hider Bot
 
 Hider starts a meter away from seeker and begins it's quest to find a good hiding place immediately after running the program. First, to make sure the hider did not find the same hiding place every time, the hider turns in one of four directions, which is selected randomly. Once a direction is picked, another method called chooseDirection gives a resepective yaw value to turn to, which was determined based on the general design of the map, so the hider would get to explore all regions of the map quickly. 
