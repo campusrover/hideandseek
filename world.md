@@ -4,4 +4,4 @@ For our project, we decided to learn more about sdf and world files so that we c
 
 We had trouble in the beginnning figuring out how to run an sdf file but soon realized that we had to copy paste the code from the sdf file to a world file in order to add our model to a world. This was our final product: 
 
-![custom world](gazebo_world.png)
+![custom world](images/gazebo_world.png)
