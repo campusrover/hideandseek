@@ -1,6 +1,6 @@
 # Autonomous Hide and Seek
 
-Picture will go here
+![alt text](/images/hideandseekimage1.png?raw=true)
 
 A robotics project by Mahima Devanahalli and Belle Scott, autonomous hide and seek features two turtlebot robots in the gazebo similator in a custom map setting. In their environment, the hider will first be given time to hide while the seeker waits, then the seeker can pursue it around the map. Written mostly in python, this program includes techniques of odometry, LIDAR, and computer vision using OpenCV. 
 
