@@ -1,7 +1,7 @@
 root: ./
 
 structure:
-  readme: README.md
+  index: index.md
   summary: SUMMARY.md
 theme: jekyll-theme-slate
 title: "Autonomous Hide and Seek"
