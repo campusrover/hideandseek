@@ -1,0 +1,10 @@
+root: ./
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md
+theme: jekyll-theme-slate
+title: "Autonomous Hide and Seek"
+baseurl: "/hideandseek" # the subpath of your site, e.g. /blog
+url: "https://hideandseek.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
+author: "Belle Scott and Mahima Devanahalli"
