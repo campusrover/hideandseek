@@ -1,3 +1,14 @@
+# Table of contents
+
+* [General Overview](overview.md)
+  * [Hider](hider.md)
+  * [Seeker](seeker.md)
+  * [Launch File](launch.md)
+  * [Custom World](world.md)
+* [Difficulties and Obstacles Overcome](obstacles.md)
+  * [Bugs](bugs.md)
+  * [Reflection](reflection.md)
+
 ### The Seeker Algorithm
 
 The seeker algorithm begins with the seeker waiting for a set period of time till the hider is able to hide. The code below shows how we got the seeker to wait 40 seconds before moving. In the scan callback function, we check whether the time passes has been more than 40, if not the seeker continues waiting. 
