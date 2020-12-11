@@ -1,3 +1,15 @@
+# Table of contents
+
+* [General Overview](overview.md)
+  * [Hider](hider.md)
+  * [Seeker](seeker.md)
+  * [Launch File](launch.md)
+  * [Custom World](world.md)
+* [Difficulties and Obstacles Overcome](obstacles.md)
+  * [Bugs](bugs.md)
+  * [Reflection](reflection.md)
+
+
 ## Bugs and Imperfect Behavior 
 
 As with many robotics projects, not all behavior turns out perfectly 100% of the time. Though we did acheive great results, our program, like all others, is not perfect, and we would like to acknowledge that. 
