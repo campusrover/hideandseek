@@ -1,3 +1,15 @@
+# Table of contents
+
+* [General Overview](overview.md)
+  * [Hider](hider.md)
+  * [Seeker](seeker.md)
+  * [Launch File](launch.md)
+  * [Custom World](world.md)
+* [Difficulties and Obstacles Overcome](obstacles.md)
+  * [Bugs](bugs.md)
+  * [Reflection](reflection.md)
+
+
 ## Launch File
 
 Our launch file first designates args for the x,y, and z positions for each robot, as well as their respective yaws. 
