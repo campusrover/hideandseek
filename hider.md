@@ -17,7 +17,6 @@ Hider starts a meter away from seeker and begins it's quest to find a good hidin
 ``` xml 
         direction = random.randint(1,4)
         print 'Direction: [%s]' % (direction)
-        direction =4 
         turn = chooseDirection(direction)           #to shorten the turning time, it turns both ways depending on selected direction
         if turn > 0:                
             while yaw < turn:       #turn to the left
