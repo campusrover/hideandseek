@@ -137,7 +137,6 @@ while not rospy.is_shutdown():
     if turned == False:             #if initial heading has not been selected yet 
         direction = random.randint(1,4)
         print 'Direction: [%s]' % (direction)
-        direction =4 
         turn = chooseDirection(direction)           #to shorten the turning time, it turns both ways depending on selected direction
         if turn > 0:                
             while yaw < turn:       #turn to the left
